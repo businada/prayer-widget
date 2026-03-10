@@ -61,21 +61,13 @@ color:#3ddcff;
 
 <script>
 
-let prayers={};
+let prayers = [];
 
 async function loadPrayerTimes(){
 
-let res=await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4");
-let data=await res.json();
-let t=data.data.timings;
-
-prayers={
-Fajr:t.Fajr,
-Dhuhr:t.Dhuhr,
-Asr:t.Asr,
-Maghrib:t.Maghrib,
-Isha:t.Isha
-};
+let res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4");
+let data = await res.json();
+let t = data.data.timings;
 
 document.getElementById("fajr").innerText=t.Fajr;
 document.getElementById("dhuhr").innerText=t.Dhuhr;
@@ -83,24 +75,15 @@ document.getElementById("asr").innerText=t.Asr;
 document.getElementById("maghrib").innerText=t.Maghrib;
 document.getElementById("isha").innerText=t.Isha;
 
-}
+prayers = [
+["Fajr",t.Fajr],
+["Dhuhr",t.Dhuhr],
+["Asr",t.Asr],
+["Maghrib",t.Maghrib],
+["Isha",t.Isha]
+];
 
-function getNextPrayer(){
-
-let now=new Date();
-
-for(let name in prayers){
-
-let [h,m]=prayers[name].split(":");
-
-let prayerTime=new Date();
-prayerTime.setHours(h,m,0);
-
-if(prayerTime>now){
-return {name,time:prayerTime};
-}
-
-}
+startCountdown();
 
 }
 
@@ -108,29 +91,50 @@ function startCountdown(){
 
 setInterval(()=>{
 
-let next=getNextPrayer();
+let now = new Date();
 
-if(!next)return;
+let nextName = "";
+let nextTime = null;
 
-document.getElementById("nextPrayer").innerText="Next: "+next.name;
+for(let p of prayers){
 
-let diff=next.time-new Date();
+let [name,time] = p;
 
-let h=Math.floor(diff/1000/60/60);
-let m=Math.floor(diff/1000/60)%60;
-let s=Math.floor(diff/1000)%60;
+let [h,m] = time.split(":");
 
-document.getElementById("countdown").innerText=
+let prayer = new Date();
+prayer.setHours(h,m,0);
+
+if(prayer > now){
+nextName = name;
+nextTime = prayer;
+break;
+}
+
+}
+
+if(!nextTime) return;
+
+document.getElementById("nextPrayer").innerText = "Next: " + nextName;
+
+let diff = nextTime - now;
+
+let h = Math.floor(diff/1000/60/60);
+let m = Math.floor(diff/1000/60)%60;
+let s = Math.floor(diff/1000)%60;
+
+document.getElementById("countdown").innerText =
 `${h}:${m}:${s}`;
 
 },1000);
 
 }
 
-loadPrayerTimes().then(startCountdown);
+loadPrayerTimes();
 
 </script>
 
 </body>
 </html>
+
 
