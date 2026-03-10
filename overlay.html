@@ -80,7 +80,7 @@ margin-top:8px;
 
 async function loadTimes(){
 
-let res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4");
+let res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=8");
 
 let data = await res.json();
 
@@ -174,9 +174,7 @@ let s=Math.floor((diff%60000)/1000);
 document.getElementById("countdown").innerText=
 
 String(h).padStart(2,"0")+":"+
-
 String(m).padStart(2,"0")+":"+
-
 String(s).padStart(2,"0");
 
 },1000);
