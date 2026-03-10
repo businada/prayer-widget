@@ -23,20 +23,20 @@ width:420px;
 .row{
 display:flex;
 justify-content:space-between;
-padding:10px 0;
+padding:12px 0;
 font-size:26px;
 border-bottom:1px solid #333;
 }
 
 .next{
-margin-top:25px;
+margin-top:30px;
 text-align:center;
 }
 
 .countdown{
 font-size:40px;
+color:#00d0ff;
 margin-top:10px;
-color:#3ddcff;
 }
 </style>
 
@@ -61,44 +61,44 @@ color:#3ddcff;
 
 <script>
 
-let prayers=[];
+async function loadTimes(){
 
-async function loadPrayerTimes(){
+const res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4");
+const data = await res.json();
 
-let res=await fetch("https://api.aladhan.com/v1/timings?latitude=25.2048&longitude=55.2708&method=4&timezone=Asia/Dubai");
-let data=await res.json();
-let t=data.data.timings;
+const t = data.data.timings;
 
-document.getElementById("fajr").innerText=t.Fajr;
-document.getElementById("dhuhr").innerText=t.Dhuhr;
-document.getElementById("asr").innerText=t.Asr;
-document.getElementById("maghrib").innerText=t.Maghrib;
-document.getElementById("isha").innerText=t.Isha;
+document.getElementById("fajr").textContent = t.Fajr;
+document.getElementById("dhuhr").textContent = t.Dhuhr;
+document.getElementById("asr").textContent = t.Asr;
+document.getElementById("maghrib").textContent = t.Maghrib;
+document.getElementById("isha").textContent = t.Isha;
 
-prayers=[
-["Fajr",t.Fajr],
-["Dhuhr",t.Dhuhr],
-["Asr",t.Asr],
-["Maghrib",t.Maghrib],
-["Isha",t.Isha]
-];
-
-startCountdown();
+startCountdown(t);
 
 }
 
-function startCountdown(){
+function startCountdown(times){
 
 setInterval(()=>{
 
-let now=new Date();
+let now = new Date();
+
+let prayers = [
+["Fajr",times.Fajr],
+["Dhuhr",times.Dhuhr],
+["Asr",times.Asr],
+["Maghrib",times.Maghrib],
+["Isha",times.Isha]
+];
 
 let nextName="";
 let nextTime=null;
 
 for(let p of prayers){
 
-let [name,time]=p;
+let name=p[0];
+let time=p[1];
 
 let [h,m]=time.split(":");
 
@@ -106,11 +106,9 @@ let prayer=new Date();
 prayer.setHours(h,m,0);
 
 if(prayer>now){
-
 nextName=name;
 nextTime=prayer;
 break;
-
 }
 
 }
@@ -135,18 +133,16 @@ let h=Math.floor(diff/1000/60/60);
 let m=Math.floor(diff/1000/60)%60;
 let s=Math.floor(diff/1000)%60;
 
-document.getElementById("countdown").innerText=`${h}:${m}:${s}`;
+document.getElementById("countdown").innerText=
+`${h}:${m}:${s}`;
 
 },1000);
 
 }
 
-loadPrayerTimes();
+loadTimes();
 
 </script>
+
 </body>
 </html>
-
-
-
-
