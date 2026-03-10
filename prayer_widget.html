@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<meta charset="UTF-8">
+
+<title>Dubai Prayer Widget</title>
+
+<style>
+
+body{
+background:#000;
+color:white;
+font-family:Segoe UI;
+margin:0;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.container{
+width:360px;
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+padding:10px 0;
+font-size:22px;
+border-bottom:1px solid #333;
+}
+
+.next{
+margin-top:25px;
+text-align:center;
+}
+
+.nextPrayer{
+font-size:28px;
+color:#aaa;
+}
+
+.countdown{
+font-size:60px;
+font-weight:bold;
+margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="row"><div>Fajr</div><div>5:16 AM</div></div>
+<div class="row"><div>Sunrise</div><div>6:30 AM</div></div>
+<div class="row"><div>Dhuhr</div><div>12:32 PM</div></div>
+<div class="row"><div>Asr</div><div>3:54 PM</div></div>
+<div class="row"><div>Maghrib</div><div>6:29 PM</div></div>
+<div class="row"><div>Isha</div><div>7:42 PM</div></div>
+
+<div class="next">
+
+<div class="nextPrayer" id="nextName">
+Next Prayer
+</div>
+
+<div class="countdown" id="countdown">
+00:00:00
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const prayers = {
+
+Fajr:"5:16 AM",
+Sunrise:"6:30 AM",
+Dhuhr:"12:32 PM",
+Asr:"3:54 PM",
+Maghrib:"6:29 PM",
+Isha:"7:42 PM"
+
+}
+
+function parseTime(t){
+
+let now = new Date()
+
+let parts = t.split(" ")
+
+let time = parts[0].split(":")
+
+let hour = parseInt(time[0])
+let minute = parseInt(time[1])
+
+if(parts[1] === "PM" && hour !== 12) hour += 12
+if(parts[1] === "AM" && hour === 12) hour = 0
+
+let d = new Date()
+
+d.setHours(hour)
+d.setMinutes(minute)
+d.setSeconds(0)
+
+return d
+
+}
+
+function getNextPrayer(){
+
+let now = new Date()
+
+for(let p in prayers){
+
+let prayerTime = parseTime(prayers[p])
+
+if(prayerTime > now){
+
+return {name:p,time:prayerTime}
+
+}
+
+}
+
+}
+
+function update(){
+
+let n = getNextPrayer()
+
+let diff = n.time - new Date()
+
+let h = Math.floor(diff/3600000)
+let m = Math.floor((diff%3600000)/60000)
+let s = Math.floor((diff%60000)/1000)
+
+document.getElementById("nextName").innerHTML =
+"Next Prayer: " + n.name
+
+document.getElementById("countdown").innerHTML =
+String(h).padStart(2,'0')+":"+
+String(m).padStart(2,'0')+":"+
+String(s).padStart(2,'0')
+
+}
+
+update()
+
+setInterval(update,1000)
+
+</script>
+
+</body>
+</html>
