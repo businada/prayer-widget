@@ -1,21 +1,72 @@
-<script>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Prayer Widget</title>
 
-function pad(n){
-return n.toString().padStart(2,'0');
+<style>
+
+body{
+    background:#000;
+    color:white;
+    font-family:Arial;
+    text-align:center;
 }
+
+.widget{
+    width:260px;
+    margin:auto;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 0;
+    font-size:18px;
+}
+
+.next{
+    margin-top:15px;
+    font-size:20px;
+}
+
+.count{
+    font-size:28px;
+    margin-top:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="widget">
+
+<div class="row"><span>Fajr</span><span id="fajr">--</span></div>
+<div class="row"><span>Dhuhr</span><span id="dhuhr">--</span></div>
+<div class="row"><span>Asr</span><span id="asr">--</span></div>
+<div class="row"><span>Maghrib</span><span id="maghrib">--</span></div>
+<div class="row"><span>Isha</span><span id="isha">--</span></div>
+
+<div class="next">
+Next Prayer
+<div class="count" id="countdown">00:00:00</div>
+</div>
+
+</div>
+
+<script>
 
 function formatTime24to12(time){
 
 const [h,m] = time.split(":");
 let hour = parseInt(h);
-const minute = m;
-
-let ampm = hour >= 12 ? "PM" : "AM";
+let ampm = hour >= 12 ? "PM":"AM";
 
 hour = hour % 12;
 hour = hour ? hour : 12;
 
-return hour + ":" + minute + " " + ampm;
+return hour + ":" + m + " " + ampm;
 
 }
 
@@ -51,22 +102,18 @@ const list = [
 ["Isha",prayers.Isha]
 ];
 
-let nextName="";
 let nextTime=null;
 
 for(const p of list){
 
 const [h,m] = p[1].split(":");
-
 const prayer = new Date();
+
 prayer.setHours(h,m,0,0);
 
 if(prayer > now){
-
-nextName = p[0];
 nextTime = prayer;
 break;
-
 }
 
 }
@@ -74,16 +121,11 @@ break;
 if(!nextTime){
 
 const [h,m] = list[0][1].split(":");
-
 nextTime = new Date();
 nextTime.setDate(nextTime.getDate()+1);
 nextTime.setHours(h,m,0,0);
 
-nextName = "Fajr";
-
 }
-
-document.getElementById("nextPrayer").textContent = "Next: " + nextName;
 
 const diff = nextTime - now;
 
@@ -92,12 +134,17 @@ const m = Math.floor(diff/1000/60)%60;
 const s = Math.floor(diff/1000)%60;
 
 document.getElementById("countdown").textContent =
-pad(h)+":"+pad(m)+":"+pad(s);
+String(h).padStart(2,'0') + ":" +
+String(m).padStart(2,'0') + ":" +
+String(s).padStart(2,'0');
 
-},1000);
+},1000)
 
 }
 
 loadPrayerTimes();
 
 </script>
+
+</body>
+</html>
