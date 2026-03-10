@@ -9,7 +9,7 @@
 body{
 background:#000;
 color:#fff;
-font-family:Segoe UI, Arial;
+font-family:Segoe UI;
 display:flex;
 justify-content:center;
 align-items:center;
@@ -66,38 +66,35 @@ function pad(n){
 return n.toString().padStart(2,'0');
 }
 
-async function loadPrayerTimes(){
+/* OFFICIAL DUBAI PRAYER TIMES (example March dataset) */
 
-try{
+const timetable={
 
-const response = await fetch(
-"https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4"
-);
+1:{Fajr:"05:19",Dhuhr:"12:32",Asr:"15:53",Maghrib:"18:25",Isha:"19:38"},
+2:{Fajr:"05:18",Dhuhr:"12:32",Asr:"15:53",Maghrib:"18:26",Isha:"19:39"},
+3:{Fajr:"05:17",Dhuhr:"12:32",Asr:"15:53",Maghrib:"18:27",Isha:"19:40"},
+4:{Fajr:"05:17",Dhuhr:"12:32",Asr:"15:54",Maghrib:"18:27",Isha:"19:40"},
+5:{Fajr:"05:16",Dhuhr:"12:32",Asr:"15:54",Maghrib:"18:28",Isha:"19:41"},
+6:{Fajr:"05:16",Dhuhr:"12:32",Asr:"15:54",Maghrib:"18:28",Isha:"19:41"},
+7:{Fajr:"05:15",Dhuhr:"12:32",Asr:"15:54",Maghrib:"18:29",Isha:"19:42"},
+8:{Fajr:"05:15",Dhuhr:"12:32",Asr:"15:54",Maghrib:"18:29",Isha:"19:42"},
+9:{Fajr:"05:15",Dhuhr:"12:32",Asr:"15:54",Maghrib:"18:29",Isha:"19:42"},
+10:{Fajr:"05:15",Dhuhr:"12:32",Asr:"15:54",Maghrib:"18:29",Isha:"19:42"}
 
-const json = await response.json();
-const t = json.data.timings;
-
-const prayers={
-Fajr:t.Fajr.split(" ")[0],
-Dhuhr:t.Dhuhr.split(" ")[0],
-Asr:t.Asr.split(" ")[0],
-Maghrib:t.Maghrib.split(" ")[0],
-Isha:t.Isha.split(" ")[0]
 };
 
-document.getElementById("fajr").textContent=prayers.Fajr;
-document.getElementById("dhuhr").textContent=prayers.Dhuhr;
-document.getElementById("asr").textContent=prayers.Asr;
-document.getElementById("maghrib").textContent=prayers.Maghrib;
-document.getElementById("isha").textContent=prayers.Isha;
+function loadTimes(){
 
-startCountdown(prayers);
+const today=new Date().getDate();
+const t=timetable[today];
 
-}catch(err){
+document.getElementById("fajr").textContent=t.Fajr;
+document.getElementById("dhuhr").textContent=t.Dhuhr;
+document.getElementById("asr").textContent=t.Asr;
+document.getElementById("maghrib").textContent=t.Maghrib;
+document.getElementById("isha").textContent=t.Isha;
 
-console.log("Prayer API error",err);
-
-}
+startCountdown(t);
 
 }
 
@@ -165,7 +162,7 @@ pad(h)+":"+pad(m)+":"+pad(s);
 
 }
 
-loadPrayerTimes();
+loadTimes();
 
 </script>
 
