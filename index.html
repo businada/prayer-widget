@@ -68,12 +68,10 @@ return n.toString().padStart(2,'0');
 
 async function loadPrayerTimes(){
 
-try{
+const url =
+"https://api.aladhan.com/v1/timings?latitude=25.2048&longitude=55.2708&method=8&timezone=Asia/Dubai";
 
-const response = await fetch(
-"https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4"
-);
-
+const response = await fetch(url);
 const data = await response.json();
 const t = data.data.timings;
 
@@ -92,12 +90,6 @@ document.getElementById("maghrib").textContent = prayers.Maghrib;
 document.getElementById("isha").textContent = prayers.Isha;
 
 startCountdown(prayers);
-
-}catch(err){
-
-console.log("Prayer API error",err);
-
-}
 
 }
 
