@@ -5,7 +5,6 @@
 <title>Dubai Prayer Times</title>
 
 <style>
-
 body{
 background:#000;
 color:#fff;
@@ -39,7 +38,6 @@ font-size:42px;
 color:#00d0ff;
 margin-top:10px;
 }
-
 </style>
 </head>
 
@@ -68,14 +66,14 @@ return n.toString().padStart(2,'0');
 
 async function loadPrayerTimes(){
 
-const response = await fetch(
-"https://api.pray.zone/v2/times/today.json?city=dubai"
+const res = await fetch(
+"https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=99"
 );
 
-const data = await response.json();
-const t = data.results.datetime[0].times;
+const data = await res.json();
+const t = data.data.timings;
 
-const prayers = {
+const prayers={
 Fajr:t.Fajr,
 Dhuhr:t.Dhuhr,
 Asr:t.Asr,
@@ -83,11 +81,11 @@ Maghrib:t.Maghrib,
 Isha:t.Isha
 };
 
-document.getElementById("fajr").textContent = prayers.Fajr;
-document.getElementById("dhuhr").textContent = prayers.Dhuhr;
-document.getElementById("asr").textContent = prayers.Asr;
-document.getElementById("maghrib").textContent = prayers.Maghrib;
-document.getElementById("isha").textContent = prayers.Isha;
+document.getElementById("fajr").textContent=prayers.Fajr;
+document.getElementById("dhuhr").textContent=prayers.Dhuhr;
+document.getElementById("asr").textContent=prayers.Asr;
+document.getElementById("maghrib").textContent=prayers.Maghrib;
+document.getElementById("isha").textContent=prayers.Isha;
 
 startCountdown(prayers);
 
@@ -97,9 +95,9 @@ function startCountdown(prayers){
 
 setInterval(()=>{
 
-const now = new Date();
+const now=new Date();
 
-const prayerList = [
+const list=[
 ["Fajr",prayers.Fajr],
 ["Dhuhr",prayers.Dhuhr],
 ["Asr",prayers.Asr],
@@ -110,20 +108,20 @@ const prayerList = [
 let nextName="";
 let nextTime=null;
 
-for(const p of prayerList){
+for(const p of list){
 
-const name = p[0];
-const time = p[1];
+const name=p[0];
+const time=p[1];
 
-const [h,m] = time.split(":");
+const [h,m]=time.split(":");
 
-const prayerDate = new Date();
-prayerDate.setHours(h,m,0,0);
+const prayer=new Date();
+prayer.setHours(h,m,0,0);
 
-if(prayerDate > now){
+if(prayer>now){
 
-nextName = name;
-nextTime = prayerDate;
+nextName=name;
+nextTime=prayer;
 break;
 
 }
@@ -132,25 +130,25 @@ break;
 
 if(!nextTime){
 
-const [h,m] = prayerList[0][1].split(":");
+const [h,m]=list[0][1].split(":");
 
-nextTime = new Date();
+nextTime=new Date();
 nextTime.setDate(nextTime.getDate()+1);
 nextTime.setHours(h,m,0,0);
 
-nextName = "Fajr";
+nextName="Fajr";
 
 }
 
-document.getElementById("nextPrayer").textContent = "Next: " + nextName;
+document.getElementById("nextPrayer").textContent="Next: "+nextName;
 
-const diff = nextTime - now;
+const diff=nextTime-now;
 
-const h = Math.floor(diff/1000/60/60);
-const m = Math.floor(diff/1000/60)%60;
-const s = Math.floor(diff/1000)%60;
+const h=Math.floor(diff/1000/60/60);
+const m=Math.floor(diff/1000/60)%60;
+const s=Math.floor(diff/1000)%60;
 
-document.getElementById("countdown").textContent =
+document.getElementById("countdown").textContent=
 pad(h)+":"+pad(m)+":"+pad(s);
 
 },1000);
