@@ -68,29 +68,31 @@ margin-top:4px;
 <script>
 
 function formatTime(time){
-let [h,m] = time.split(":");
-h=parseInt(h);
+const parts = time.split(":");
+let h = parseInt(parts[0]);
+let m = parts[1];
 
-let ampm=h>=12?"PM":"AM";
-h=h%12;
-h=h?h:12;
+let ampm = h >= 12 ? "PM" : "AM";
 
-return h+":"+m+" "+ampm;
+h = h % 12;
+h = h ? h : 12;
+
+return h + ":" + m + " " + ampm;
 }
 
 async function loadPrayerTimes(){
 
-const res=await fetch("dubai_prayer_times.json");
-const data=await res.json();
+const response = await fetch("dubai_prayer_times.json");
+const data = await response.json();
 
-const today=new Date().getDate();
-const t=data[today];
+const today = new Date().getDate();
+const t = data[today];
 
-document.getElementById("fajr").textContent=formatTime(t.Fajr);
-document.getElementById("dhuhr").textContent=formatTime(t.Dhuhr);
-document.getElementById("asr").textContent=formatTime(t.Asr);
-document.getElementById("maghrib").textContent=formatTime(t.Maghrib);
-document.getElementById("isha").textContent=formatTime(t.Isha);
+document.getElementById("fajr").textContent = formatTime(t.Fajr);
+document.getElementById("dhuhr").textContent = formatTime(t.Dhuhr);
+document.getElementById("asr").textContent = formatTime(t.Asr);
+document.getElementById("maghrib").textContent = formatTime(t.Maghrib);
+document.getElementById("isha").textContent = formatTime(t.Isha);
 
 startCountdown(t);
 
@@ -98,54 +100,58 @@ startCountdown(t);
 
 function startCountdown(prayers){
 
-const list=[
-["Fajr",prayers.Fajr],
-["Dhuhr",prayers.Dhuhr],
-["Asr",prayers.Asr],
-["Maghrib",prayers.Maghrib],
-["Isha",prayers.Isha]
+const list = [
+["Fajr", prayers.Fajr],
+["Dhuhr", prayers.Dhuhr],
+["Asr", prayers.Asr],
+["Maghrib", prayers.Maghrib],
+["Isha", prayers.Isha]
 ];
 
 setInterval(()=>{
 
-const now=new Date();
-let next=null;
-let nextName="";
+const now = new Date();
+let nextTime = null;
+let nextName = "";
 
 for(const p of list){
 
-const [h,m]=p[1].split(":");
-let prayer=new Date();
-prayer.setHours(h,m,0,0);
+const parts = p[1].split(":");
+const prayer = new Date();
 
-if(prayer>now){
-next=prayer;
-nextName=p[0];
+prayer.setHours(parts[0],parts[1],0,0);
+
+if(prayer > now){
+nextTime = prayer;
+nextName = p[0];
 break;
 }
 
 }
 
-if(!next){
+if(!nextTime){
 
-const [h,m]=list[0][1].split(":");
-next=new Date();
-next.setDate(next.getDate()+1);
-next.setHours(h,m,0,0);
-nextName="Fajr";
+const parts = list[0][1].split(":");
+nextTime = new Date();
+
+nextTime.setDate(nextTime.getDate()+1);
+nextTime.setHours(parts[0],parts[1],0,0);
+
+nextName = "Fajr";
+
 }
 
-document.getElementById("nextPrayer").textContent=nextName;
+document.getElementById("nextPrayer").textContent = nextName;
 
-const diff=next-now;
+const diff = nextTime - now;
 
-const h=Math.floor(diff/1000/60/60);
-const m=Math.floor(diff/1000/60)%60;
-const s=Math.floor(diff/1000)%60;
+const h = Math.floor(diff/1000/60/60);
+const m = Math.floor(diff/1000/60)%60;
+const s = Math.floor(diff/1000)%60;
 
-document.getElementById("countdown").textContent=
-String(h).padStart(2,'0')+":"+
-String(m).padStart(2,'0')+":"+
+document.getElementById("countdown").textContent =
+String(h).padStart(2,'0') + ":" +
+String(m).padStart(2,'0') + ":" +
 String(s).padStart(2,'0');
 
 },1000)
