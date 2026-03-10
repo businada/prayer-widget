@@ -2,14 +2,19 @@
 
 async function loadTimes(){
 
-let res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=99");
+let position = await new Promise((resolve,reject)=>{
+navigator.geolocation.getCurrentPosition(resolve,reject);
+});
 
+let lat = position.coords.latitude;
+let lon = position.coords.longitude;
+
+let url = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=8&school=1`;
+
+let res = await fetch(url);
 let data = await res.json();
 
 let t = data.data.timings;
-
-// Manual correction used by Dubai schedule
-t.Isha = adjustIsha(t.Maghrib);
 
 document.getElementById("fajr").innerText=format(t.Fajr);
 document.getElementById("dhuhr").innerText=format(t.Dhuhr);
@@ -21,26 +26,9 @@ calculateNext(t);
 
 }
 
-function adjustIsha(maghrib){
-
-let parts = maghrib.split(":");
-
-let h = parseInt(parts[0]);
-let m = parseInt(parts[1]);
-
-// Dubai rule ~75 minutes after Maghrib
-m += 75;
-
-if(m >= 60){
-h += Math.floor(m/60);
-m = m % 60;
-}
-
-return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
-
-}
-
 function format(time){
+
+time = time.split(" ")[0];
 
 let parts=time.split(":");
 let h=parseInt(parts[0]);
@@ -82,7 +70,6 @@ d.setSeconds(0);
 if(d>now){
 
 next={name:p.name,time:d};
-
 break;
 
 }
@@ -96,7 +83,6 @@ let parts=prayers[0].time.split(":");
 let d=new Date();
 
 d.setDate(d.getDate()+1);
-
 d.setHours(parts[0]);
 d.setMinutes(parts[1]);
 d.setSeconds(0);
@@ -116,7 +102,6 @@ let m=Math.floor((diff%3600000)/60000);
 let s=Math.floor((diff%60000)/1000);
 
 document.getElementById("countdown").innerText=
-
 String(h).padStart(2,"0")+":"+
 String(m).padStart(2,"0")+":"+
 String(s).padStart(2,"0");
