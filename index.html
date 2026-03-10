@@ -68,12 +68,12 @@ return n.toString().padStart(2,'0');
 
 async function loadPrayerTimes(){
 
-const url =
-"https://api.aladhan.com/v1/timings?latitude=25.2048&longitude=55.2708&method=8&timezone=Asia/Dubai";
+const response = await fetch(
+"https://api.pray.zone/v2/times/today.json?city=dubai"
+);
 
-const response = await fetch(url);
 const data = await response.json();
-const t = data.data.timings;
+const t = data.results.datetime[0].times;
 
 const prayers = {
 Fajr:t.Fajr,
