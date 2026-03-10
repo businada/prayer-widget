@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Prayer Overlay</title>
+
+<style>
+body{
+margin:0;
+background:transparent;
+font-family:Segoe UI, sans-serif;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.widget{
+background:#0d0f14;
+padding:18px;
+border-radius:12px;
+width:210px;
+color:white;
+box-shadow:0 0 20px rgba(0,0,0,0.5);
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+padding:4px 0;
+border-bottom:1px solid rgba(255,255,255,0.06);
+}
+
+.row:last-child{
+border:none;
+}
+
+.next{
+text-align:center;
+margin-top:10px;
+font-size:13px;
+opacity:.8;
+}
+
+.countdown{
+text-align:center;
+font-size:26px;
+font-weight:700;
+margin-top:4px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="widget">
+
+<div class="row"><span>Fajr</span><span id="fajr">--</span></div>
+<div class="row"><span>Dhuhr</span><span id="dhuhr">--</span></div>
+<div class="row"><span>Asr</span><span id="asr">--</span></div>
+<div class="row"><span>Maghrib</span><span id="maghrib">--</span></div>
+<div class="row"><span>Isha</span><span id="isha">--</span></div>
+
+<div class="next">Next Prayer</div>
+<div class="next" id="nextName">--</div>
+<div class="countdown" id="countdown">00:00:00</div>
+
+</div>
+
+<script>
+
+let prayers={}
+
+async function loadTimes(){
+
+let res=await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4")
+let data=await res.json()
+
+let t=data.data.timings
+
+prayers={
+Fajr:t.Fajr,
+Dhuhr:t.Dhuhr,
+Asr:t.Asr,
+Maghrib:t.Maghrib,
+Isha:t.Isha
+}
+
+document.getElementById("fajr").textContent=t.Fajr
+document.getElementById("dhuhr").textContent=t.Dhuhr
+document.getElementById("asr").textContent=t.Asr
+document.getElementById("maghrib").textContent=t.Maghrib
+document.getElementById("isha").textContent=t.Isha
+
+}
+
+function getNextPrayer(){
+
+let now=new Date()
+
+for(let name in prayers){
+
+let [h,m]=prayers[name].split(":")
+let prayer=new Date()
+
+prayer.setHours(h)
+prayer.setMinutes(m)
+prayer.setSeconds(0)
+
+if(prayer>now){
+return{name,time:prayer}
+}
+
+}
+
+return null
+}
+
+function updateCountdown(){
+
+let next=getNextPrayer()
+
+if(!next)return
+
+document.getElementById("nextName").textContent=next.name
+
+let now=new Date()
+let diff=(next.time-now)/1000
+
+let h=Math.floor(diff/3600)
+let m=Math.floor((diff%3600)/60)
+let s=Math.floor(diff%60)
+
+document.getElementById("countdown").textContent=
+String(h).padStart(2,"0")+":"+
+String(m).padStart(2,"0")+":"+
+String(s).padStart(2,"0")
+
+}
+
+loadTimes()
+
+setInterval(updateCountdown,1000)
+
+</script>
+
+</body>
+</html>
