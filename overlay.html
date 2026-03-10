@@ -1,20 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Prayer Widget</title>
+
+<style>
+
+body{
+margin:0;
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+background:#000;
+font-family:Segoe UI, Arial;
+color:white;
+}
+
+.card{
+background:#0d0d0d;
+padding:30px;
+border-radius:18px;
+width:320px;
+box-shadow:0 0 40px rgba(0,0,0,0.6);
+}
+
+.row{
+display:flex;
+justify-content:space-between;
+padding:8px 0;
+border-bottom:1px solid rgba(255,255,255,0.08);
+font-size:18px;
+}
+
+.row:last-child{
+border:none;
+}
+
+.nextTitle{
+text-align:center;
+margin-top:20px;
+opacity:0.7;
+}
+
+.nextName{
+text-align:center;
+font-size:26px;
+margin-top:4px;
+}
+
+.countdown{
+text-align:center;
+font-size:36px;
+font-weight:bold;
+margin-top:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<div class="row"><span>Fajr</span><span id="fajr">--</span></div>
+<div class="row"><span>Dhuhr</span><span id="dhuhr">--</span></div>
+<div class="row"><span>Asr</span><span id="asr">--</span></div>
+<div class="row"><span>Maghrib</span><span id="maghrib">--</span></div>
+<div class="row"><span>Isha</span><span id="isha">--</span></div>
+
+<div class="nextTitle">Next Prayer</div>
+<div class="nextName" id="nextPrayer">--</div>
+<div class="countdown" id="countdown">00:00:00</div>
+
+</div>
+
 <script>
 
-async function loadTimes(){
+async function loadPrayerTimes(){
 
-let position = await new Promise((resolve,reject)=>{
-navigator.geolocation.getCurrentPosition(resolve,reject);
-});
+let lat = 25.2048;
+let lon = 55.2708;
 
-let lat = position.coords.latitude;
-let lon = position.coords.longitude;
+// Dubai coordinates (accurate for Dulook comparison)
 
-let url = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=8&school=1`;
+let url = `https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=8`;
 
 let res = await fetch(url);
+
 let data = await res.json();
 
 let t = data.data.timings;
+
+updateUI(t);
+
+calculateNext(t);
+
+}
+
+function updateUI(t){
 
 document.getElementById("fajr").innerText=format(t.Fajr);
 document.getElementById("dhuhr").innerText=format(t.Dhuhr);
@@ -22,21 +106,22 @@ document.getElementById("asr").innerText=format(t.Asr);
 document.getElementById("maghrib").innerText=format(t.Maghrib);
 document.getElementById("isha").innerText=format(t.Isha);
 
-calculateNext(t);
-
 }
 
 function format(time){
 
-time = time.split(" ")[0];
+time=time.split(" ")[0];
 
 let parts=time.split(":");
+
 let h=parseInt(parts[0]);
+
 let m=parts[1];
 
 let ampm=h>=12?"PM":"AM";
 
 h=h%12;
+
 if(h==0)h=12;
 
 return h+":"+m+" "+ampm;
@@ -64,12 +149,15 @@ let parts=p.time.split(":");
 let d=new Date();
 
 d.setHours(parts[0]);
+
 d.setMinutes(parts[1]);
+
 d.setSeconds(0);
 
 if(d>now){
 
 next={name:p.name,time:d};
+
 break;
 
 }
@@ -83,8 +171,11 @@ let parts=prayers[0].time.split(":");
 let d=new Date();
 
 d.setDate(d.getDate()+1);
+
 d.setHours(parts[0]);
+
 d.setMinutes(parts[1]);
+
 d.setSeconds(0);
 
 next={name:"Fajr",time:d};
@@ -98,7 +189,9 @@ setInterval(()=>{
 let diff=next.time-new Date();
 
 let h=Math.floor(diff/3600000);
+
 let m=Math.floor((diff%3600000)/60000);
+
 let s=Math.floor((diff%60000)/1000);
 
 document.getElementById("countdown").innerText=
@@ -110,6 +203,9 @@ String(s).padStart(2,"0");
 
 }
 
-loadTimes();
+loadPrayerTimes();
 
 </script>
+
+</body>
+</html>
