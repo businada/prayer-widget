@@ -1,16 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <meta charset="UTF-8">
-
-<title>Dubai Prayer Widget</title>
+<title>Businada Prayer Widget</title>
 
 <style>
-
 body{
 background:#000;
-color:white;
+color:#fff;
 font-family:Segoe UI;
 margin:0;
 display:flex;
@@ -20,14 +17,14 @@ height:100vh;
 }
 
 .container{
-width:360px;
+width:420px;
 }
 
 .row{
 display:flex;
 justify-content:space-between;
 padding:10px 0;
-font-size:22px;
+font-size:24px;
 border-bottom:1px solid #333;
 }
 
@@ -36,124 +33,101 @@ margin-top:25px;
 text-align:center;
 }
 
-.nextPrayer{
-font-size:28px;
-color:#aaa;
-}
-
 .countdown{
-font-size:60px;
-font-weight:bold;
+font-size:36px;
+color:#3ddcff;
 margin-top:10px;
 }
-
 </style>
 
 </head>
-
 <body>
 
 <div class="container">
 
-<div class="row"><div>Fajr</div><div>5:16 AM</div></div>
-<div class="row"><div>Sunrise</div><div>6:30 AM</div></div>
-<div class="row"><div>Dhuhr</div><div>12:32 PM</div></div>
-<div class="row"><div>Asr</div><div>3:54 PM</div></div>
-<div class="row"><div>Maghrib</div><div>6:29 PM</div></div>
-<div class="row"><div>Isha</div><div>7:42 PM</div></div>
+<div class="row"><span>Fajr</span><span id="fajr">--</span></div>
+<div class="row"><span>Dhuhr</span><span id="dhuhr">--</span></div>
+<div class="row"><span>Asr</span><span id="asr">--</span></div>
+<div class="row"><span>Maghrib</span><span id="maghrib">--</span></div>
+<div class="row"><span>Isha</span><span id="isha">--</span></div>
 
 <div class="next">
-
-<div class="nextPrayer" id="nextName">
-Next Prayer
-</div>
-
-<div class="countdown" id="countdown">
-00:00:00
-</div>
-
+<div id="nextName"></div>
+<div class="countdown" id="countdown"></div>
 </div>
 
 </div>
 
 <script>
 
-const prayers = {
+let prayers={};
 
-Fajr:"5:16 AM",
-Sunrise:"6:30 AM",
-Dhuhr:"12:32 PM",
-Asr:"3:54 PM",
-Maghrib:"6:29 PM",
-Isha:"7:42 PM"
+async function loadTimes(){
 
-}
+let url="https://api.aladhan.com/v1/timings?latitude=25.2048&longitude=55.2708&method=4";
 
-function parseTime(t){
+let res=await fetch(url);
+let data=await res.json();
+let t=data.data.timings;
 
-let now = new Date()
+prayers={
+Fajr:t.Fajr,
+Dhuhr:t.Dhuhr,
+Asr:t.Asr,
+Maghrib:t.Maghrib,
+Isha:t.Isha
+};
 
-let parts = t.split(" ")
-
-let time = parts[0].split(":")
-
-let hour = parseInt(time[0])
-let minute = parseInt(time[1])
-
-if(parts[1] === "PM" && hour !== 12) hour += 12
-if(parts[1] === "AM" && hour === 12) hour = 0
-
-let d = new Date()
-
-d.setHours(hour)
-d.setMinutes(minute)
-d.setSeconds(0)
-
-return d
+document.getElementById("fajr").innerText=t.Fajr;
+document.getElementById("dhuhr").innerText=t.Dhuhr;
+document.getElementById("asr").innerText=t.Asr;
+document.getElementById("maghrib").innerText=t.Maghrib;
+document.getElementById("isha").innerText=t.Isha;
 
 }
 
 function getNextPrayer(){
 
-let now = new Date()
+let now=new Date();
 
-for(let p in prayers){
+for(let name in prayers){
 
-let prayerTime = parseTime(prayers[p])
+let [h,m]=prayers[name].split(":");
 
-if(prayerTime > now){
+let time=new Date();
+time.setHours(h,m,0);
 
-return {name:p,time:prayerTime}
-
+if(time>now){
+return {name,time};
 }
 
 }
 
 }
 
-function update(){
+function startCountdown(){
 
-let n = getNextPrayer()
+setInterval(()=>{
 
-let diff = n.time - new Date()
+let next=getNextPrayer();
+if(!next) return;
 
-let h = Math.floor(diff/3600000)
-let m = Math.floor((diff%3600000)/60000)
-let s = Math.floor((diff%60000)/1000)
+document.getElementById("nextName").innerText="Next: "+next.name;
 
-document.getElementById("nextName").innerHTML =
-"Next Prayer: " + n.name
+let diff=next.time-new Date();
 
-document.getElementById("countdown").innerHTML =
-String(h).padStart(2,'0')+":"+
-String(m).padStart(2,'0')+":"+
-String(s).padStart(2,'0')
+let h=Math.floor(diff/1000/60/60);
+let m=Math.floor(diff/1000/60)%60;
+let s=Math.floor(diff/1000)%60;
+
+document.getElementById("countdown").innerText=
+`${h}:${m}:${s}`;
+
+},1000);
 
 }
 
-update()
-
-setInterval(update,1000)
+loadTimes().then(startCountdown);
 
 </script>
 
