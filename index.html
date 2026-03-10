@@ -60,17 +60,17 @@ margin-top:10px;
 
 <script>
 
-let prayers={};
+let prayers = {};
 
 async function loadTimes(){
 
-let url="https://api.aladhan.com/v1/timings?latitude=25.2048&longitude=55.2708&method=4";
+let url = "https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4";
 
-let res=await fetch(url);
-let data=await res.json();
-let t=data.data.timings;
+let res = await fetch(url);
+let data = await res.json();
+let t = data.data.timings;
 
-prayers={
+prayers = {
 Fajr:t.Fajr,
 Dhuhr:t.Dhuhr,
 Asr:t.Asr,
@@ -86,19 +86,39 @@ document.getElementById("isha").innerText=t.Isha;
 
 }
 
+function parseTime(timeStr){
+
+let date = new Date();
+let [time,modifier] = timeStr.split(" ");
+
+let [hours,minutes] = time.split(":");
+
+if(modifier === "PM" && hours != 12){
+hours = parseInt(hours) + 12;
+}
+
+if(modifier === "AM" && hours == 12){
+hours = 0;
+}
+
+date.setHours(hours);
+date.setMinutes(minutes);
+date.setSeconds(0);
+
+return date;
+
+}
+
 function getNextPrayer(){
 
-let now=new Date();
+let now = new Date();
 
 for(let name in prayers){
 
-let [h,m]=prayers[name].split(":");
+let prayerTime = parseTime(prayers[name]);
 
-let time=new Date();
-time.setHours(h,m,0);
-
-if(time>now){
-return {name,time};
+if(prayerTime > now){
+return {name, prayerTime};
 }
 
 }
@@ -109,18 +129,19 @@ function startCountdown(){
 
 setInterval(()=>{
 
-let next=getNextPrayer();
+let next = getNextPrayer();
+
 if(!next) return;
 
-document.getElementById("nextName").innerText="Next: "+next.name;
+document.getElementById("nextPrayer").innerText = next.name;
 
-let diff=next.time-new Date();
+let diff = next.prayerTime - new Date();
 
-let h=Math.floor(diff/1000/60/60);
-let m=Math.floor(diff/1000/60)%60;
-let s=Math.floor(diff/1000)%60;
+let h = Math.floor(diff/1000/60/60);
+let m = Math.floor(diff/1000/60)%60;
+let s = Math.floor(diff/1000)%60;
 
-document.getElementById("countdown").innerText=
+document.getElementById("countdown").innerText =
 `${h}:${m}:${s}`;
 
 },1000);
@@ -130,6 +151,6 @@ document.getElementById("countdown").innerText=
 loadTimes().then(startCountdown);
 
 </script>
-
 </body>
 </html>
+
