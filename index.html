@@ -2,18 +2,18 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Businada Prayer Widget</title>
+<title>Dubai Prayer Times</title>
 
 <style>
 body{
-background:#000;
-color:#fff;
+background:black;
+color:white;
 font-family:Segoe UI;
-margin:0;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
+margin:0;
 }
 
 .container{
@@ -24,7 +24,7 @@ width:420px;
 display:flex;
 justify-content:space-between;
 padding:10px 0;
-font-size:24px;
+font-size:26px;
 border-bottom:1px solid #333;
 }
 
@@ -34,13 +34,14 @@ text-align:center;
 }
 
 .countdown{
-font-size:36px;
-color:#3ddcff;
+font-size:40px;
 margin-top:10px;
+color:#3ddcff;
 }
 </style>
 
 </head>
+
 <body>
 
 <div class="container">
@@ -52,25 +53,23 @@ margin-top:10px;
 <div class="row"><span>Isha</span><span id="isha">--</span></div>
 
 <div class="next">
-<div id="nextName"></div>
-<div class="countdown" id="countdown"></div>
+<div id="nextPrayer">Next Prayer</div>
+<div class="countdown" id="countdown">--:--:--</div>
 </div>
 
 </div>
 
 <script>
 
-let prayers = {};
+let prayers={};
 
-async function loadTimes(){
+async function loadPrayerTimes(){
 
-let url = "https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4";
+let res=await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4");
+let data=await res.json();
+let t=data.data.timings;
 
-let res = await fetch(url);
-let data = await res.json();
-let t = data.data.timings;
-
-prayers = {
+prayers={
 Fajr:t.Fajr,
 Dhuhr:t.Dhuhr,
 Asr:t.Asr,
@@ -86,39 +85,19 @@ document.getElementById("isha").innerText=t.Isha;
 
 }
 
-function parseTime(timeStr){
-
-let date = new Date();
-let [time,modifier] = timeStr.split(" ");
-
-let [hours,minutes] = time.split(":");
-
-if(modifier === "PM" && hours != 12){
-hours = parseInt(hours) + 12;
-}
-
-if(modifier === "AM" && hours == 12){
-hours = 0;
-}
-
-date.setHours(hours);
-date.setMinutes(minutes);
-date.setSeconds(0);
-
-return date;
-
-}
-
 function getNextPrayer(){
 
-let now = new Date();
+let now=new Date();
 
 for(let name in prayers){
 
-let prayerTime = parseTime(prayers[name]);
+let [h,m]=prayers[name].split(":");
 
-if(prayerTime > now){
-return {name, prayerTime};
+let prayerTime=new Date();
+prayerTime.setHours(h,m,0);
+
+if(prayerTime>now){
+return {name,time:prayerTime};
 }
 
 }
@@ -129,28 +108,29 @@ function startCountdown(){
 
 setInterval(()=>{
 
-let next = getNextPrayer();
+let next=getNextPrayer();
 
-if(!next) return;
+if(!next)return;
 
-document.getElementById("nextPrayer").innerText = next.name;
+document.getElementById("nextPrayer").innerText="Next: "+next.name;
 
-let diff = next.prayerTime - new Date();
+let diff=next.time-new Date();
 
-let h = Math.floor(diff/1000/60/60);
-let m = Math.floor(diff/1000/60)%60;
-let s = Math.floor(diff/1000)%60;
+let h=Math.floor(diff/1000/60/60);
+let m=Math.floor(diff/1000/60)%60;
+let s=Math.floor(diff/1000)%60;
 
-document.getElementById("countdown").innerText =
+document.getElementById("countdown").innerText=
 `${h}:${m}:${s}`;
 
 },1000);
 
 }
 
-loadTimes().then(startCountdown);
+loadPrayerTimes().then(startCountdown);
 
 </script>
+
 </body>
 </html>
 
