@@ -65,7 +65,7 @@ let prayers = [];
 
 async function loadPrayerTimes(){
 
-let res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4");
+let res = await fetch(https://api.aladhan.com/v1/timings?latitude=25.2048&longitude=55.2708&method=4&timezone=Asia/Dubai);
 let data = await res.json();
 let t = data.data.timings;
 
@@ -136,5 +136,6 @@ loadPrayerTimes();
 
 </body>
 </html>
+
 
 
