@@ -1,90 +1,15 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Prayer Widget</title>
-
-<style>
-
-body{
-margin:0;
-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-background:#000;
-font-family:Segoe UI, Arial;
-color:white;
-}
-
-.card{
-background:#0d0d0d;
-padding:30px;
-border-radius:18px;
-width:320px;
-box-shadow:0 0 40px rgba(0,0,0,0.6);
-}
-
-.row{
-display:flex;
-justify-content:space-between;
-padding:8px 0;
-border-bottom:1px solid rgba(255,255,255,0.08);
-font-size:18px;
-}
-
-.row:last-child{
-border:none;
-}
-
-.nextTitle{
-text-align:center;
-margin-top:20px;
-opacity:0.7;
-}
-
-.nextName{
-text-align:center;
-font-size:26px;
-margin-top:4px;
-}
-
-.countdown{
-text-align:center;
-font-size:36px;
-font-weight:bold;
-margin-top:8px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="card">
-
-<div class="row"><span>Fajr</span><span id="fajr">--</span></div>
-<div class="row"><span>Dhuhr</span><span id="dhuhr">--</span></div>
-<div class="row"><span>Asr</span><span id="asr">--</span></div>
-<div class="row"><span>Maghrib</span><span id="maghrib">--</span></div>
-<div class="row"><span>Isha</span><span id="isha">--</span></div>
-
-<div class="nextTitle">Next Prayer</div>
-<div class="nextName" id="nextPrayer">--</div>
-<div class="countdown" id="countdown">00:00:00</div>
-
-</div>
-
 <script>
 
 async function loadTimes(){
 
-let res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=8");
+let res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=99");
 
 let data = await res.json();
 
 let t = data.data.timings;
+
+// Manual correction used by Dubai schedule
+t.Isha = adjustIsha(t.Maghrib);
 
 document.getElementById("fajr").innerText=format(t.Fajr);
 document.getElementById("dhuhr").innerText=format(t.Dhuhr);
@@ -93,6 +18,25 @@ document.getElementById("maghrib").innerText=format(t.Maghrib);
 document.getElementById("isha").innerText=format(t.Isha);
 
 calculateNext(t);
+
+}
+
+function adjustIsha(maghrib){
+
+let parts = maghrib.split(":");
+
+let h = parseInt(parts[0]);
+let m = parseInt(parts[1]);
+
+// Dubai rule ~75 minutes after Maghrib
+m += 75;
+
+if(m >= 60){
+h += Math.floor(m/60);
+m = m % 60;
+}
+
+return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0");
 
 }
 
@@ -184,6 +128,3 @@ String(s).padStart(2,"0");
 loadTimes();
 
 </script>
-
-</body>
-</html>
