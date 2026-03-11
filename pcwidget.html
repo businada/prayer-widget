@@ -1,149 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Dubai Prayer Dashboard</title>
-
-<style>
-
-body{
-margin:0;
-background:black;
-color:white;
-font-family:Segoe UI;
-height:100vh;
-display:flex;
-flex-direction:column;
-justify-content:center;
-align-items:center;
-}
-
-.location{
-position:absolute;
-top:20px;
-font-size:20px;
-opacity:0.8;
-}
-
-.container{
-display:flex;
-gap:90px;
-}
-
-.prayer{
-text-align:center;
-}
-
-.name{
-font-size:26px;
-opacity:0.7;
-}
-
-.time{
-font-size:60px;
-font-weight:600;
-}
-
-.next{
-position:absolute;
-bottom:40px;
-text-align:center;
-}
-
-.countdown{
-font-size:50px;
-font-weight:bold;
-color:#00e5ff;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="location">Dubai</div>
-
-<div class="container">
-
-<div class="prayer">
-<div class="name">Fajr</div>
-<div class="time" id="fajr">--</div>
-</div>
-
-<div class="prayer">
-<div class="name">Sunrise</div>
-<div class="time" id="sunrise">--</div>
-</div>
-
-<div class="prayer">
-<div class="name">Dhuhr</div>
-<div class="time" id="dhuhr">--</div>
-</div>
-
-<div class="prayer">
-<div class="name">Asr</div>
-<div class="time" id="asr">--</div>
-</div>
-
-<div class="prayer">
-<div class="name">Maghrib</div>
-<div class="time" id="maghrib">--</div>
-</div>
-
-<div class="prayer">
-<div class="name">Isha</div>
-<div class="time" id="isha">--</div>
-</div>
-
-</div>
-
-<div class="next">
-<div>Next Prayer</div>
-<div id="nextprayer">--</div>
-<div class="countdown" id="countdown">00:00:00</div>
-</div>
-
 <script>
 
 let prayers=[]
 
-function clean(t){
+function cleanTime(t){
 return t.split(" ")[0]
 }
 
 function parseTime(t){
-
 let [h,m]=t.split(":")
 let d=new Date()
-
 d.setHours(parseInt(h))
 d.setMinutes(parseInt(m))
 d.setSeconds(0)
-
 return d
 }
 
-async function loadTimes(){
+async function loadPrayerTimes(){
 
-let today = new Date()
-let day = today.getDate()
-let month = today.getMonth()+1
-let year = today.getFullYear()
-
-let url=`https://api.aladhan.com/v1/timings/${day}-${month}-${year}?latitude=25.2048&longitude=55.2708&method=8`
-
-let res = await fetch(url)
-let data = await res.json()
+let res=await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4")
+let data=await res.json()
 
 let t=data.data.timings
 
-let fajr=clean(t.Fajr)
-let sunrise=clean(t.Sunrise)
-let dhuhr=clean(t.Dhuhr)
-let asr=clean(t.Asr)
-let maghrib=clean(t.Maghrib)
-let isha=clean(t.Isha)
+let fajr=cleanTime(t.Fajr)
+let sunrise=cleanTime(t.Sunrise)
+let dhuhr=cleanTime(t.Dhuhr)
+let asr=cleanTime(t.Asr)
+let maghrib=cleanTime(t.Maghrib)
+let isha=cleanTime(t.Isha)
 
 document.getElementById("fajr").innerText=fajr
 document.getElementById("sunrise").innerText=sunrise
@@ -191,11 +75,7 @@ return
 
 }
 
-loadTimes()
-
+loadPrayerTimes()
 setInterval(updateCountdown,1000)
 
 </script>
-
-</body>
-</html>
