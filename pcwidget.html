@@ -45,10 +45,6 @@ font-size:60px;
 font-weight:600;
 }
 
-.sunrise{
-opacity:0.6;
-}
-
 .next{
 position:absolute;
 bottom:40px;
@@ -82,7 +78,7 @@ margin-top:5px;
 <div class="time" id="fajr">--</div>
 </div>
 
-<div class="prayer sunrise">
+<div class="prayer">
 <div class="name">Sunrise</div>
 <div class="time" id="sunrise">--</div>
 </div>
@@ -124,6 +120,7 @@ function parseTime(t){
 
 let [h,m]=t.split(":")
 let d=new Date()
+
 d.setHours(parseInt(h))
 d.setMinutes(parseInt(m))
 d.setSeconds(0)
@@ -132,12 +129,12 @@ return d
 
 }
 
-async function loadTimes(){
+async function loadPrayerTimes(){
 
-let res=await fetch("dubai_prayer_times.json")
-let data=await res.json()
+let res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=8")
+let data = await res.json()
 
-let t=data.today
+let t = data.data.timings
 
 document.getElementById("fajr").innerText=t.Fajr
 document.getElementById("sunrise").innerText=t.Sunrise
@@ -176,9 +173,9 @@ return
 
 function updateCountdown(){
 
-updateNextPrayer()
+if(prayers.length===0) return
 
-if(!nextPrayerTime) return
+updateNextPrayer()
 
 let now=new Date()
 let diff=nextPrayerTime-now
@@ -187,14 +184,14 @@ let h=Math.floor(diff/1000/60/60)
 let m=Math.floor(diff/1000/60)%60
 let s=Math.floor(diff/1000)%60
 
-document.getElementById("countdown").innerText =
+document.getElementById("countdown").innerText=
 h.toString().padStart(2,"0")+":"+
 m.toString().padStart(2,"0")+":"+
 s.toString().padStart(2,"0")
 
 }
 
-loadTimes()
+loadPrayerTimes()
 
 setInterval(updateCountdown,1000)
 
