@@ -1,10 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Dubai Prayer Times</title>
+
+<style>
+
+body{
+margin:0;
+background:black;
+color:white;
+font-family:Segoe UI;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+height:100vh;
+overflow:hidden;
+}
+
+.location{
+position:absolute;
+top:10px;
+font-size:18px;
+opacity:.8;
+}
+
+.container{
+display:flex;
+gap:80px;
+}
+
+.prayer{
+text-align:center;
+}
+
+.name{
+font-size:22px;
+opacity:.7;
+}
+
+.time{
+font-size:56px;
+font-weight:bold;
+}
+
+.next{
+position:absolute;
+bottom:20px;
+text-align:center;
+}
+
+.countdown{
+font-size:42px;
+color:#00e5ff;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="location">Dubai</div>
+
+<div class="container">
+
+<div class="prayer">
+<div class="name">Fajr</div>
+<div class="time" id="fajr">--</div>
+</div>
+
+<div class="prayer">
+<div class="name">Sunrise</div>
+<div class="time" id="sunrise">--</div>
+</div>
+
+<div class="prayer">
+<div class="name">Dhuhr</div>
+<div class="time" id="dhuhr">--</div>
+</div>
+
+<div class="prayer">
+<div class="name">Asr</div>
+<div class="time" id="asr">--</div>
+</div>
+
+<div class="prayer">
+<div class="name">Maghrib</div>
+<div class="time" id="maghrib">--</div>
+</div>
+
+<div class="prayer">
+<div class="name">Isha</div>
+<div class="time" id="isha">--</div>
+</div>
+
+</div>
+
+<div class="next">
+<div id="nextPrayer">Next Prayer</div>
+<div class="countdown" id="countdown">--:--:--</div>
+</div>
+
 <script>
 
 let prayers=[]
-
-function cleanTime(t){
-return t.split(" ")[0]
-}
 
 function parseTime(t){
 let [h,m]=t.split(":")
@@ -15,33 +117,26 @@ d.setSeconds(0)
 return d
 }
 
-async function loadPrayerTimes(){
+async function loadTimes(){
 
 let res=await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=4")
 let data=await res.json()
 
 let t=data.data.timings
 
-let fajr=cleanTime(t.Fajr)
-let sunrise=cleanTime(t.Sunrise)
-let dhuhr=cleanTime(t.Dhuhr)
-let asr=cleanTime(t.Asr)
-let maghrib=cleanTime(t.Maghrib)
-let isha=cleanTime(t.Isha)
-
-document.getElementById("fajr").innerText=fajr
-document.getElementById("sunrise").innerText=sunrise
-document.getElementById("dhuhr").innerText=dhuhr
-document.getElementById("asr").innerText=asr
-document.getElementById("maghrib").innerText=maghrib
-document.getElementById("isha").innerText=isha
+document.getElementById("fajr").innerText=t.Fajr
+document.getElementById("sunrise").innerText=t.Sunrise
+document.getElementById("dhuhr").innerText=t.Dhuhr
+document.getElementById("asr").innerText=t.Asr
+document.getElementById("maghrib").innerText=t.Maghrib
+document.getElementById("isha").innerText=t.Isha
 
 prayers=[
-["Fajr",parseTime(fajr)],
-["Dhuhr",parseTime(dhuhr)],
-["Asr",parseTime(asr)],
-["Maghrib",parseTime(maghrib)],
-["Isha",parseTime(isha)]
+["Fajr",parseTime(t.Fajr)],
+["Dhuhr",parseTime(t.Dhuhr)],
+["Asr",parseTime(t.Asr)],
+["Maghrib",parseTime(t.Maghrib)],
+["Isha",parseTime(t.Isha)]
 ]
 
 }
@@ -60,7 +155,7 @@ let h=Math.floor(diff/1000/60/60)
 let m=Math.floor(diff/1000/60)%60
 let s=Math.floor(diff/1000)%60
 
-document.getElementById("nextprayer").innerText=p[0]
+document.getElementById("nextPrayer").innerText="Next: "+p[0]
 
 document.getElementById("countdown").innerText=
 h.toString().padStart(2,"0")+":"+
@@ -75,7 +170,11 @@ return
 
 }
 
-loadPrayerTimes()
+loadTimes()
+
 setInterval(updateCountdown,1000)
 
 </script>
+
+</body>
+</html>
