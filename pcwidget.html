@@ -37,7 +37,6 @@ text-align:center;
 .name{
 font-size:26px;
 opacity:0.7;
-margin-bottom:6px;
 }
 
 .time{
@@ -51,16 +50,10 @@ bottom:40px;
 text-align:center;
 }
 
-.nextname{
-font-size:24px;
-opacity:0.7;
-}
-
 .countdown{
 font-size:50px;
 font-weight:bold;
 color:#00e5ff;
-margin-top:5px;
 }
 
 </style>
@@ -106,7 +99,7 @@ margin-top:5px;
 </div>
 
 <div class="next">
-<div class="nextname">Next Prayer</div>
+<div>Next Prayer</div>
 <div id="nextprayer">--</div>
 <div class="countdown" id="countdown">00:00:00</div>
 </div>
@@ -114,7 +107,10 @@ margin-top:5px;
 <script>
 
 let prayers=[]
-let nextPrayerTime=null
+
+function clean(t){
+return t.split(" ")[0]
+}
 
 function parseTime(t){
 
@@ -126,34 +122,47 @@ d.setMinutes(parseInt(m))
 d.setSeconds(0)
 
 return d
-
 }
 
-async function loadPrayerTimes(){
+async function loadTimes(){
 
-let res = await fetch("https://api.aladhan.com/v1/timingsByCity?city=Dubai&country=UAE&method=8")
+let today = new Date()
+let day = today.getDate()
+let month = today.getMonth()+1
+let year = today.getFullYear()
+
+let url=`https://api.aladhan.com/v1/timings/${day}-${month}-${year}?latitude=25.2048&longitude=55.2708&method=8`
+
+let res = await fetch(url)
 let data = await res.json()
 
-let t = data.data.timings
+let t=data.data.timings
 
-document.getElementById("fajr").innerText=t.Fajr
-document.getElementById("sunrise").innerText=t.Sunrise
-document.getElementById("dhuhr").innerText=t.Dhuhr
-document.getElementById("asr").innerText=t.Asr
-document.getElementById("maghrib").innerText=t.Maghrib
-document.getElementById("isha").innerText=t.Isha
+let fajr=clean(t.Fajr)
+let sunrise=clean(t.Sunrise)
+let dhuhr=clean(t.Dhuhr)
+let asr=clean(t.Asr)
+let maghrib=clean(t.Maghrib)
+let isha=clean(t.Isha)
+
+document.getElementById("fajr").innerText=fajr
+document.getElementById("sunrise").innerText=sunrise
+document.getElementById("dhuhr").innerText=dhuhr
+document.getElementById("asr").innerText=asr
+document.getElementById("maghrib").innerText=maghrib
+document.getElementById("isha").innerText=isha
 
 prayers=[
-["Fajr",parseTime(t.Fajr)],
-["Dhuhr",parseTime(t.Dhuhr)],
-["Asr",parseTime(t.Asr)],
-["Maghrib",parseTime(t.Maghrib)],
-["Isha",parseTime(t.Isha)]
+["Fajr",parseTime(fajr)],
+["Dhuhr",parseTime(dhuhr)],
+["Asr",parseTime(asr)],
+["Maghrib",parseTime(maghrib)],
+["Isha",parseTime(isha)]
 ]
 
 }
 
-function updateNextPrayer(){
+function updateCountdown(){
 
 let now=new Date()
 
@@ -161,8 +170,19 @@ for(let p of prayers){
 
 if(p[1]>now){
 
-nextPrayerTime=p[1]
+let diff=p[1]-now
+
+let h=Math.floor(diff/1000/60/60)
+let m=Math.floor(diff/1000/60)%60
+let s=Math.floor(diff/1000)%60
+
 document.getElementById("nextprayer").innerText=p[0]
+
+document.getElementById("countdown").innerText=
+h.toString().padStart(2,"0")+":"+
+m.toString().padStart(2,"0")+":"+
+s.toString().padStart(2,"0")
+
 return
 
 }
@@ -171,27 +191,7 @@ return
 
 }
 
-function updateCountdown(){
-
-if(prayers.length===0) return
-
-updateNextPrayer()
-
-let now=new Date()
-let diff=nextPrayerTime-now
-
-let h=Math.floor(diff/1000/60/60)
-let m=Math.floor(diff/1000/60)%60
-let s=Math.floor(diff/1000)%60
-
-document.getElementById("countdown").innerText=
-h.toString().padStart(2,"0")+":"+
-m.toString().padStart(2,"0")+":"+
-s.toString().padStart(2,"0")
-
-}
-
-loadPrayerTimes()
+loadTimes()
 
 setInterval(updateCountdown,1000)
 
