@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Dubai Prayer Widget</title>
+<title>Dubai Prayer Dashboard</title>
 
 <style>
 
@@ -21,13 +21,13 @@ align-items:center;
 .location{
 position:absolute;
 top:20px;
-font-size:18px;
-opacity:0.7;
+font-size:20px;
+opacity:0.8;
 }
 
 .container{
 display:flex;
-gap:120px;
+gap:90px;
 }
 
 .prayer{
@@ -35,24 +35,36 @@ text-align:center;
 }
 
 .name{
-font-size:28px;
+font-size:26px;
 opacity:0.7;
+margin-bottom:6px;
 }
 
 .time{
 font-size:60px;
-font-weight:bold;
+font-weight:600;
+}
+
+.sunrise{
+opacity:0.6;
 }
 
 .next{
-margin-top:70px;
+position:absolute;
+bottom:40px;
 text-align:center;
+}
+
+.nextname{
+font-size:24px;
+opacity:0.7;
 }
 
 .countdown{
 font-size:50px;
-color:#00e5ff;
 font-weight:bold;
+color:#00e5ff;
+margin-top:5px;
 }
 
 </style>
@@ -68,6 +80,11 @@ font-weight:bold;
 <div class="prayer">
 <div class="name">Fajr</div>
 <div class="time" id="fajr">--</div>
+</div>
+
+<div class="prayer sunrise">
+<div class="name">Sunrise</div>
+<div class="time" id="sunrise">--</div>
 </div>
 
 <div class="prayer">
@@ -93,8 +110,8 @@ font-weight:bold;
 </div>
 
 <div class="next">
-<div>Next Prayer</div>
-<div id="nextname">--</div>
+<div class="nextname">Next Prayer</div>
+<div id="nextprayer">--</div>
 <div class="countdown" id="countdown">00:00:00</div>
 </div>
 
@@ -102,6 +119,18 @@ font-weight:bold;
 
 let prayers=[]
 let nextPrayerTime=null
+
+function parseTime(t){
+
+let [h,m]=t.split(":")
+let d=new Date()
+d.setHours(parseInt(h))
+d.setMinutes(parseInt(m))
+d.setSeconds(0)
+
+return d
+
+}
 
 async function loadTimes(){
 
@@ -111,38 +140,32 @@ let data=await res.json()
 let t=data.today
 
 document.getElementById("fajr").innerText=t.Fajr
+document.getElementById("sunrise").innerText=t.Sunrise
 document.getElementById("dhuhr").innerText=t.Dhuhr
 document.getElementById("asr").innerText=t.Asr
 document.getElementById("maghrib").innerText=t.Maghrib
 document.getElementById("isha").innerText=t.Isha
 
 prayers=[
-["Fajr",t.Fajr],
-["Dhuhr",t.Dhuhr],
-["Asr",t.Asr],
-["Maghrib",t.Maghrib],
-["Isha",t.Isha]
+["Fajr",parseTime(t.Fajr)],
+["Dhuhr",parseTime(t.Dhuhr)],
+["Asr",parseTime(t.Asr)],
+["Maghrib",parseTime(t.Maghrib)],
+["Isha",parseTime(t.Isha)]
 ]
 
 }
 
-function calculateNext(){
+function updateNextPrayer(){
 
 let now=new Date()
 
 for(let p of prayers){
 
-let [h,m]=p[1].split(":")
+if(p[1]>now){
 
-let target=new Date()
-target.setHours(h)
-target.setMinutes(m)
-target.setSeconds(0)
-
-if(target>now){
-
-nextPrayerTime=target
-document.getElementById("nextname").innerText=p[0]
+nextPrayerTime=p[1]
+document.getElementById("nextprayer").innerText=p[0]
 return
 
 }
@@ -153,12 +176,11 @@ return
 
 function updateCountdown(){
 
-calculateNext()
+updateNextPrayer()
 
 if(!nextPrayerTime) return
 
 let now=new Date()
-
 let diff=nextPrayerTime-now
 
 let h=Math.floor(diff/1000/60/60)
